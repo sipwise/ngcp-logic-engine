@@ -1,0 +1,19 @@
+#!/bin/bash
+# This script is used for running the tests with proper arguments
+# from within Jenkins
+
+set -e
+set -u
+
+if [ -d /code/reports ] ; then
+  # Running from Jenkins (RW)
+  RESULTS="/code/reports"
+
+  cd "/code"
+else
+  # Running locally in Docker
+  RESULTS="./reports"
+  mkdir -p "${RESULTS}"
+fi
+
+RESULTS=${RESULTS} make test
