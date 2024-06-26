@@ -18,6 +18,7 @@ poethepoet = ">=0.25.0"
 python = ">=3.11,<4.0"
 uvicorn = { extras = ["standard"], version = ">=0.29.0" }
 pydantic-settings = ">=2.3.0"
+redis = ">=5.0.0"
 
 [tool.poetry.group.test.dependencies]  # https://python-poetry.org/docs/master/managing-dependencies/
 coverage = { extras = ["toml"], version = ">=7.4.4" }
@@ -30,6 +31,7 @@ ruff = ">=0.3.5"
 safety = ">=3.1.0"
 shellcheck-py = ">=0.10.0.1"
 typeguard = ">=4.2.1"
+fakeredis = ">=2.23.0"
 
 [tool.poetry.group.dev.dependencies]  # https://python-poetry.org/docs/master/managing-dependencies/
 cruft = ">=2.15.0"

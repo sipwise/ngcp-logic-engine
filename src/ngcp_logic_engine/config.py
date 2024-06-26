@@ -14,7 +14,17 @@ class BaseConfig(BaseSettings):
 
 
 class DevelopmentConfig(BaseConfig):
-    """configs for development."""
+    """development config."""
+
+    redis_host: str = "redis"
+    redis_port: int = 6379
+    redis_db: int = 3
+
+    class Config:
+        """Configuration subclass."""
+
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
 class ProductionConfig(BaseConfig):
