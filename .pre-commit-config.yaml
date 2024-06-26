@@ -40,12 +40,11 @@ repos:
       - id: trailing-whitespace
         types: [python]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.7
+    rev: v0.4.10
     hooks:
       - id: ruff
-        args: ["--force-exclude", "--extend-fixable=ERA001,F401,F841,T201,T203"]
+        args: ["--extend-fixable=ERA001,F401,F841,T201,T203"]
       - id: ruff-format
-        args: [--force-exclude]
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.10.0
     hooks:
@@ -59,6 +58,9 @@ repos:
         args: ["--no-update"]
       - id: poetry-export
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+    rev: v1.10.1
     hooks:
       - id: mypy
+        exclude: tests
+        additional_dependencies:
+          - "pydantic>=1.10.4"

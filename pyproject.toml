@@ -50,6 +50,9 @@ source = ["src"]
 output = "reports/coverage.xml"
 
 [tool.mypy]  # https://mypy.readthedocs.io/en/latest/config_file.html
+exclude = [
+  "tests",
+]
 junit_xml = "reports/mypy.xml"
 plugins = "pydantic.mypy"
 strict = true
@@ -81,9 +84,8 @@ src = ["src", "tests"]
 target-version = "py311"
 
 [tool.ruff.lint]
-ignore-init-module-imports = true
-select = ["A", "ASYNC", "B", "BLE", "C4", "C90", "D", "DTZ", "E", "EM", "ERA", "F", "FBT", "FLY", "FURB", "G", "I", "ICN", "INP", "INT", "ISC", "LOG", "N", "NPY", "PERF", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SIM", "SLF", "SLOT", "T10", "T20", "TCH", "TID", "TRY", "UP", "W", "YTT"]
-ignore = ["D203", "D213", "E501", "RET504", "S101", "S307"]
+select = ["A", "ASYNC", "B", "BLE", "C4", "C90", "D", "DTZ", "E", "EM", "ERA", "F", "FBT", "FLY", "G", "I", "ICN", "INP", "INT", "ISC", "LOG", "N", "NPY", "PERF", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SIM", "SLF", "SLOT", "T10", "T20", "TCH", "TID", "TRY", "UP", "W", "YTT"]
+ignore = ["D203", "D213", "E501", "ISC001", "RET504", "S101", "S307"]
 unfixable = ["ERA001", "F401", "F841", "T201", "T203"]
 
 [tool.ruff.lint.flake8-tidy-imports]
