@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 import coloredlogs
 from fastapi import FastAPI, status
 
-from ngcp_logic_engine.models import HealthCheck
+from ngcp_logic_engine.models.api import HealthCheck
 
 
 @asynccontextmanager
