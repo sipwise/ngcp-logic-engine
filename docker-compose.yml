@@ -31,7 +31,7 @@ services:
       - POETRY_PYPI_TOKEN_PYPI
       - SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock
     ports:
-      - "8000"
+      - "8000:8000"
     volumes:
       - ~/.gitconfig:/etc/gitconfig
       - ~/.ssh/known_hosts:/home/user/.ssh/known_hosts
@@ -44,16 +44,13 @@ services:
   redis:
     image: redis:latest
     container_name: redis
-    entrypoint: ["/usr/local/bin/entrypoint.sh"]
     ports:
       - "6379:6379"
-    volumes:
-      - ./dev/redis/data.redis:/data/data.redis
-      - ./dev/redis/entrypoint.sh:/usr/local/bin/entrypoint.sh
     environment:
       - LOGIC_ENGINE_REDIS_HOST=redis
-      - LOGIC_ENGINE_REDIS_PORT=6379
-      - LOGIC_ENGINE_REDIS_DB=3
+      - LOGIC_ENGINE_REDIS=6379
+      - LOGIC_ENGINE_REDIS_CENTRAL_DB=3
+      - LOGIC_ENGINE_REDIS_LOCAL_DB=4
     profiles:
       - dev
 

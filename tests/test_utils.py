@@ -8,7 +8,7 @@ uuid = "3848276298220188511@atlanta.example.com:5060"
 
 def test_single():
     """Single value should work too."""
-    key = "local"
+    key = "general"
     assert split_general_key(key) == (key, None)
 
 

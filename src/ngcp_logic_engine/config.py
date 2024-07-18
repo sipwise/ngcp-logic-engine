@@ -11,14 +11,19 @@ class BaseConfig(BaseSettings):
     env: str = "development"
 
     model_config = SettingsConfigDict(env_prefix="logic_engine_")
+    use_dialog_id_tags: bool = False
 
 
 class DevelopmentConfig(BaseConfig):
     """development config."""
 
-    redis_host: str = "redis"
-    redis_port: int = 6379
-    redis_db: int = 3
+    redis_central_host: str = "redis"
+    redis_central_port: int = 6379
+    redis_central_db: int = 3
+
+    redis_local_host: str = "redis"
+    redis_local_port: int = 6379
+    redis_local_db: int = 4
 
     class Config:
         """Configuration subclass."""

@@ -3,7 +3,7 @@
 import pytest
 
 from ngcp_logic_engine import config
-from ngcp_logic_engine.api import Counter
+from ngcp_logic_engine.api import DialogManager, RedisManager
 
 
 def pytest_configure(config):
@@ -25,22 +25,33 @@ def mock_env_testing(request, monkeypatch):
 
 
 @pytest.fixture()
-def redis_client():
+def redis_client_central():
     """Provide a fake redis connection."""
     import fakeredis
 
-    redis_client = fakeredis.FakeRedis()
-    return redis_client
+    redis_client_central_db = fakeredis.FakeRedis(decode_responses=True)
+    return redis_client_central_db
 
 
 @pytest.fixture()
-def fake_counters(redis_client, monkeypatch, request):
-    """Provide counter with fake redis connection."""
+def redis_client_local():
+    """Provide a fake redis connection."""
+    import fakeredis
 
-    def counter(name, uuid=None):
-        cnt = Counter(name, uuid)
-        cnt.redis_db = redis_client
-        return cnt
+    redis_client_local_db = fakeredis.FakeRedis(decode_responses=True)
+    return redis_client_local_db
 
-    monkeypatch.setattr("ngcp_logic_engine.api.Counter", counter)
-    return redis_client
+
+@pytest.fixture()
+def fake_redis_manager(redis_client_central, redis_client_local, monkeypatch):
+    """Provide a mock RedisManager object."""
+    RedisManager.central_db = redis_client_central
+    RedisManager.local_db = redis_client_local
+
+    return RedisManager
+
+
+@pytest.fixture()
+def fake_dialog_manager(fake_redis_manager, monkeypatch):
+    """Provide a mock DialogManager object."""
+    return DialogManager
