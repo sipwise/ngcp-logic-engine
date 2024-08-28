@@ -65,3 +65,10 @@ class GeneralCounter(str, BaseEnum):
     peer_faxserver = "peer:faxserver"
     peer_appsrv = "peer:appsrv"
     peer_pbxsrv = "peer:pbxsrv"
+
+
+class CounterResult(BaseModel):
+    """Result of getter."""
+
+    name: str
+    value: int

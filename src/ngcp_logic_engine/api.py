@@ -10,7 +10,7 @@ from fastapi import APIRouter, Body, FastAPI, status
 from redis import RedisError
 
 from ngcp_logic_engine.dialogmanager import DialogManager
-from ngcp_logic_engine.models.api import HealthCheck
+from ngcp_logic_engine.models.api import CounterResult, HealthCheck
 from ngcp_logic_engine.models.dialog import (
     AccountDialogIdBundle,
     ActiveUserDialogParams,
@@ -88,6 +88,22 @@ def ping_redis() -> bool:
         return False
     else:
         return True
+
+
+@app.get(
+    "/api/v1/counter/{key}",
+    tags=["Counter Getter"],
+    summary="Get the value of a counter.",
+    response_description="Return HTTP Status Code 200 (OK)",
+    status_code=status.HTTP_200_OK,
+)
+def get_counter(key: str) -> CounterResult:
+    """Get the value of a counter.
+
+    :returns: Value of the counter
+    :rtype: CounterResult
+    """
+    return CounterResult(name=key, value=RedisManager.get_central_value(key))
 
 
 @api_v1.post(

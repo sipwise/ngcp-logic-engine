@@ -641,3 +641,17 @@ def test_delete_huntgroup_dialog_profile(fake_dialog_manager, fake_redis_manager
     assert RedisManager.get_local_value(mock_dialog_uuid) == {
         *[key for key in all_keys if key not in deleted_keys]
     }
+
+
+def test_get_counter(fake_redis_manager) -> None:
+    """
+    Test getter of counter.
+
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    user_id = mock_caller_dialog_params["user_id"]
+    url = f"/api/v1/counter/user:{user_id}"
+    assert client.get(url).json() == {"name": f"user:{user_id}", "value": 0}
+    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
+    assert client.get(url).json() == {"name": f"user:{user_id}", "value": 1}
