@@ -29,7 +29,6 @@ mock_peer_dialog_params = {
 
 mock_caller_dialog_params = {
     "dialog": mock_dialog,
-    "is_out": True,
     "p_to_group": 0,
     "user_id": "iufasdifj23",
     "account_id": "29ru-q9wjr42",
@@ -39,7 +38,6 @@ mock_caller_dialog_params = {
 
 mock_callee_dialog_params = {
     "dialog": mock_dialog,
-    "is_out": True,
     "p_to_group": 0,
     "user_id": "iufasdifj23",
     "account_id": "29ru-q9wjr42",
@@ -201,7 +199,7 @@ def test_initialize_callee_dialog_profile(fake_dialog_manager, fake_redis_manage
     :return:
     """
     client.post("/api/v1/dialog/user/callee", json=mock_callee_dialog_params)
-    keys = make_keys("location", "locationout")
+    keys = make_keys("location")
     assert_key_value(1, keys)
     assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
 
@@ -267,7 +265,7 @@ def test_initialize_callee_totals_dialog_profile(fake_dialog_manager, fake_redis
     :return:
     """
     client.post("/api/v1/dialog/user/callee/totals", json=mock_callee_dialog_params)
-    keys = make_keys("location", "locationout")
+    keys = make_keys("location")
     assert_key_value(1, keys)
     assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
 

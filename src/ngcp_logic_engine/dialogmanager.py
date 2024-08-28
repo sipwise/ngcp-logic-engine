@@ -30,10 +30,9 @@ class DialogManager:
         :param dialog: Dialog object containing the id parameters of the dialog.
         :return:
         """
-        callid, ftag, ttag = dialog.model_dump().values()
-        dialog_id: str = callid
+        dialog_id: str = dialog.callid
         if config.settings.use_dialog_id_tags:
-            dialog_id = f"{ftag}:{callid}:{ttag}"
+            dialog_id = f"{dialog.ftag}:{dialog.callid}:{dialog.ttag}"
 
         return dialog_id
 
@@ -47,47 +46,28 @@ class DialogManager:
         :param params:
         :return:
         """
-        (
-            dialog,
-            is_out,
-            user_id,
-            account_id,
-            reseller_id,
-            location_id,
-            p_to_group,
-            callee_ip,
-        ) = map(params.model_dump().get, params.model_dump().keys())
+        dialog_uuid = cls._parse_dialog_uuid(params.dialog)
 
-        if not isinstance(dialog, dict):
-            return
-
-        _type = "callee" if isinstance(params, CalleeDialogParams) else "caller"
-        dialog_uuid = cls._parse_dialog_uuid(Dialog(**dialog))
-
-        if _type == "callee" and callee_ip is not None:
-            if location_id:
-                cls._set_dialog_profile(dialog_uuid, "location", location_id)
-                if is_out:
-                    cls._set_dialog_profile(dialog_uuid, "locationout", location_id)
+        if isinstance(params, CalleeDialogParams) and params.callee_ip:
+            if params.location_id:
+                cls._set_dialog_profile(dialog_uuid, "location", params.location_id)
             return
 
         cls._set_dialog_profile(dialog_uuid, "total")
-        cls._set_dialog_profile(dialog_uuid, "totaluser", user_id)
+        cls._set_dialog_profile(dialog_uuid, "totaluser", params.user_id)
 
-        if not p_to_group or p_to_group != 1:
-            cls._set_dialog_profile(dialog_uuid, "totalaccount", account_id)
-            cls._set_dialog_profile(dialog_uuid, "totalreseller", reseller_id)
+        if not params.p_to_group or params.p_to_group != 1:
+            cls._set_dialog_profile(dialog_uuid, "totalaccount", params.account_id)
+            cls._set_dialog_profile(dialog_uuid, "totalreseller", params.reseller_id)
 
-        if _type == "caller" and location_id:
-            cls._set_dialog_profile(dialog_uuid, "totallocation", location_id)
-
-        if is_out:
-            cls._set_dialog_profile(dialog_uuid, "totaluserout", user_id)
-            if not p_to_group or p_to_group != 1:
-                cls._set_dialog_profile(dialog_uuid, "totalaccountout", account_id)
-                cls._set_dialog_profile(dialog_uuid, "totalresellerout", reseller_id)
-            if _type == "caller" and location_id:
-                cls._set_dialog_profile(dialog_uuid, "totallocationout", location_id)
+        if isinstance(params, CallerDialogParams):
+            if params.location_id:
+                cls._set_dialog_profile(dialog_uuid, "totallocation", params.location_id)
+                cls._set_dialog_profile(dialog_uuid, "totallocationout", params.location_id)
+            cls._set_dialog_profile(dialog_uuid, "totaluserout", params.user_id)
+            if not params.p_to_group or params.p_to_group != 1:
+                cls._set_dialog_profile(dialog_uuid, "totalaccountout", params.account_id)
+                cls._set_dialog_profile(dialog_uuid, "totalresellerout", params.reseller_id)
         return
 
     @classmethod
@@ -100,46 +80,28 @@ class DialogManager:
         :param params:
         :return:
         """
-        (
-            dialog,
-            is_out,
-            user_id,
-            account_id,
-            reseller_id,
-            location_id,
-            callee_ip,
-            p_to_group,
-        ) = map(params.model_dump().get, params.model_dump().keys())
-
-        if not isinstance(dialog, dict):
-            return
-
         _type = "callee" if isinstance(params, CalleeDialogParams) else "caller"
-        dialog_uuid = cls._parse_dialog_uuid(Dialog(**dialog))
+        dialog_uuid = cls._parse_dialog_uuid(params.dialog)
 
-        if _type == "callee" and callee_ip is not None:
-            if location_id:
-                cls._set_dialog_profile(dialog_uuid, "location", location_id)
-                if is_out:
-                    cls._set_dialog_profile(dialog_uuid, "locationout", location_id)
+        if isinstance(params, CalleeDialogParams) and params.callee_ip:
+            if params.location_id:
+                cls._set_dialog_profile(dialog_uuid, "location", params.location_id)
             return
 
-        cls._set_dialog_profile(dialog_uuid, "user", user_id)
+        cls._set_dialog_profile(dialog_uuid, "user", params.user_id)
 
-        if not p_to_group or p_to_group != 1:
-            cls._set_dialog_profile(dialog_uuid, "account", account_id)
-            cls._set_dialog_profile(dialog_uuid, "reseller", reseller_id)
+        if not params.p_to_group or params.p_to_group != 1:
+            cls._set_dialog_profile(dialog_uuid, "account", params.account_id)
+            cls._set_dialog_profile(dialog_uuid, "reseller", params.reseller_id)
 
-        if _type == "caller" and location_id:
-            cls._set_dialog_profile(dialog_uuid, "location", location_id)
-
-        if is_out:
-            cls._set_dialog_profile(dialog_uuid, "userout", user_id)
-            if not p_to_group or p_to_group != 1:
-                cls._set_dialog_profile(dialog_uuid, "accountout", account_id)
-                cls._set_dialog_profile(dialog_uuid, "resellerout", reseller_id)
-            if _type == "caller" and location_id:
-                cls._set_dialog_profile(dialog_uuid, "locationout", location_id)
+        if isinstance(params, CallerDialogParams):
+            if params.location_id:
+                cls._set_dialog_profile(dialog_uuid, "location", params.location_id)
+                cls._set_dialog_profile(dialog_uuid, "locationout", params.location_id)
+            cls._set_dialog_profile(dialog_uuid, "userout", params.user_id)
+            if not params.p_to_group or params.p_to_group != 1:
+                cls._set_dialog_profile(dialog_uuid, "accountout", params.account_id)
+                cls._set_dialog_profile(dialog_uuid, "resellerout", params.reseller_id)
         return
 
     @classmethod

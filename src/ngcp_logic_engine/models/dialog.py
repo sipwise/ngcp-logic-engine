@@ -41,19 +41,16 @@ class PeerDialogParams(DialogParams):
 class CallerDialogParams(DialogParams):
     """Caller dialog request body parameter constraints."""
 
-    is_out: bool
     user_id: str
     account_id: str
     reseller_id: str
     location_id: str
     p_to_group: int
-    callee_ip: None = None
 
 
 class CalleeDialogParams(DialogParams):
     """Callee dialog request body parameter constraints."""
 
-    is_out: bool
     user_id: str
     account_id: str
     reseller_id: str
