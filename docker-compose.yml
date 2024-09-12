@@ -46,11 +46,6 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
-    environment:
-      - LOGIC_ENGINE_REDIS_HOST=redis
-      - LOGIC_ENGINE_REDIS=6379
-      - LOGIC_ENGINE_REDIS_CENTRAL_DB=3
-      - LOGIC_ENGINE_REDIS_LOCAL_DB=4
     profiles:
       - dev
 
@@ -61,6 +56,8 @@ services:
     tty: true
     ports:
       - "8000:8000"
+    environment:
+      - LOGIC_ENGINE_ENV=development
     profiles:
       - app
 

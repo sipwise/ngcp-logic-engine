@@ -12,11 +12,6 @@ class BaseConfig(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="logic_engine_")
     use_dialog_id_tags: bool = False
-
-
-class DevelopmentConfig(BaseConfig):
-    """development config."""
-
     redis_central_host: str = "redis"
     redis_central_port: int = 6379
     redis_central_db: int = 3
@@ -25,11 +20,9 @@ class DevelopmentConfig(BaseConfig):
     redis_local_port: int = 6379
     redis_local_db: int = 4
 
-    class Config:
-        """Configuration subclass."""
 
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+class DevelopmentConfig(BaseConfig):
+    """development config."""
 
 
 class ProductionConfig(BaseConfig):
@@ -38,6 +31,9 @@ class ProductionConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     """configs for testing."""
+
+    redis_central_host: str = "localhost"
+    redis_local_host: str = "localhost"
 
 
 @lru_cache
