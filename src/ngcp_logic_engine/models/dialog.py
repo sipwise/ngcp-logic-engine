@@ -183,6 +183,16 @@ class HuntgroupDialogKeyIds(DialogKeyIds):
     location: str
 
 
+class DialogBundle(BaseModel):
+    """
+    Dialog bundle.
+
+    Just for compability on how dialog info is added.
+    """
+
+    dialog: Dialog
+
+
 class DialogIdBundle(BaseModel):
     """
     Dialog id bundle.

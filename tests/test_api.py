@@ -22,6 +22,8 @@ mock_dialog_uuid = mock_dialog["callid"]
 if config.settings.use_dialog_id_tags:
     mock_dialog_uuid = f"{mock_dialog['ftag']}:{mock_dialog['callid']}:{mock_dialog['ttag']}"
 
+mock_dialog_bundle = {"dialog": mock_dialog}
+
 mock_peer_dialog_params = {
     "dialog": mock_dialog,
     "peer_id": "fi234908r",
@@ -279,7 +281,7 @@ def test_delete_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
     :return:
     """
     client.post("/api/v1/dialog/peer", json=mock_peer_dialog_params)
-    client.put("/api/v1/dialog/delete", json=mock_dialog)
+    client.put("/api/v1/dialog/delete", json=mock_dialog_bundle)
     keys = make_keys("peer", "peerout", "relay")
     assert_key_value(0, keys)
     assert RedisManager.get_local_value(mock_dialog_uuid) == set()

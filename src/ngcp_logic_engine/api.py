@@ -18,7 +18,7 @@ from ngcp_logic_engine.models.dialog import (
     CalleeDialogParams,
     CallerDialogIdBundle,
     CallerDialogParams,
-    Dialog,
+    DialogBundle,
     HuntgroupDialogIdBundle,
     LocationDialogIdBundle,
     PeerDialogIdBundle,
@@ -273,7 +273,7 @@ async def initialize_callee_totals_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_dialog_profile(
-    dialog: Annotated[Dialog, Body(openapi_examples=examples.routes.put.delete.payload)],
+    bundle: Annotated[DialogBundle, Body(openapi_examples=examples.routes.put.delete.payload)],
 ) -> None:
     """
     Remove dialog record from database for a dialog.
@@ -282,7 +282,7 @@ async def delete_dialog_profile(
     :param dialog: Dialog object containing the id parameters of the dialog.
     :return:
     """
-    DialogManager.delete_dialog_profile(dialog)
+    DialogManager.delete_dialog_profile(bundle.dialog)
 
 
 @api_v1.put(
