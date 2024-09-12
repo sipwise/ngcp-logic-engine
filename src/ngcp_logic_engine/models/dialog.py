@@ -22,8 +22,8 @@ class Dialog(BaseModel):
     """
 
     callid: str
-    ftag: str
-    ttag: str
+    ftag: str = Field(default="")
+    ttag: str = Field(default="")
 
 
 class DialogParams(BaseModel):
@@ -44,7 +44,7 @@ class CallerDialogParams(DialogParams):
     user_id: str
     account_id: str
     reseller_id: str
-    location_id: str
+    location_id: str = Field(default="")
     p_to_group: int
 
 
@@ -54,9 +54,9 @@ class CalleeDialogParams(DialogParams):
     user_id: str
     account_id: str
     reseller_id: str
-    location_id: str
+    location_id: str = Field(default="")
     p_to_group: int
-    callee_ip: str
+    callee_ip: str = Field(default="")
 
 
 class ActiveUserDialogParams(DialogParams):

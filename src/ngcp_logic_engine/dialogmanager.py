@@ -32,6 +32,8 @@ class DialogManager:
         """
         dialog_id: str = dialog.callid
         if config.settings.use_dialog_id_tags:
+            if not dialog.ftag or not dialog.ttag:
+                raise ValueError("Dialog id tags can't be empty")
             dialog_id = f"{dialog.ftag}:{dialog.callid}:{dialog.ttag}"
 
         return dialog_id

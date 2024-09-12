@@ -4,10 +4,12 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Annotated
+from urllib.request import Request
 
 import coloredlogs
 from fastapi import APIRouter, Body, FastAPI, status
 from redis import RedisError
+from starlette.responses import JSONResponse
 
 from ngcp_logic_engine.dialogmanager import DialogManager
 from ngcp_logic_engine.models.api import CounterResult, HealthCheck
@@ -45,6 +47,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 api_v1 = APIRouter(prefix="/api/v1/dialog")
 app = FastAPI(lifespan=lifespan)
+
+
+@app.exception_handler(ValueError)
+async def value_error_exception_handler(request: Request, exc: ValueError):
+    """Map value errors to HTTPRequestError with code 400."""
+    return JSONResponse(
+        status_code=400,
+        content={"message": str(exc)},
+    )
 
 
 @app.get(
@@ -114,7 +125,7 @@ def get_counter(key: str) -> CounterResult:
     status_code=status.HTTP_200_OK,
 )
 async def initialize_peer_dialog_profile(
-    params: Annotated[PeerDialogParams, Body(openapi_examples=examples.routes.post.peer.payload)],
+        params: Annotated[PeerDialogParams, Body(openapi_examples=examples.routes.post.peer.payload)],
 ) -> None:
     """
     Set up a new dialog profile for a peer.
@@ -135,9 +146,9 @@ async def initialize_peer_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def initialize_caller_dialog_profile(
-    params: Annotated[
-        CallerDialogParams, Body(openapi_examples=examples.routes.post.caller.payload)
-    ],
+        params: Annotated[
+            CallerDialogParams, Body(openapi_examples=examples.routes.post.caller.payload)
+        ],
 ) -> None:
     """
     Set up a new dialog profile for a caller.
@@ -158,9 +169,9 @@ async def initialize_caller_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def initialize_callee_dialog_profile(
-    params: Annotated[
-        CalleeDialogParams, Body(openapi_examples=examples.routes.post.callee.payload)
-    ],
+        params: Annotated[
+            CalleeDialogParams, Body(openapi_examples=examples.routes.post.callee.payload)
+        ],
 ) -> None:
     """
     Set up a new dialog profile for a callee.
@@ -181,9 +192,9 @@ async def initialize_callee_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def initialize_active_caller_dialog_profile(
-    params: Annotated[
-        ActiveUserDialogParams, Body(openapi_examples=examples.routes.post.activeuser.payload)
-    ],
+        params: Annotated[
+            ActiveUserDialogParams, Body(openapi_examples=examples.routes.post.activeuser.payload)
+        ],
 ) -> None:
     """
     Set up a new dialog profile for an active caller.
@@ -204,9 +215,9 @@ async def initialize_active_caller_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def initialize_active_callee_dialog_profile(
-    params: Annotated[
-        ActiveUserDialogParams, Body(openapi_examples=examples.routes.post.activeuser.payload)
-    ],
+        params: Annotated[
+            ActiveUserDialogParams, Body(openapi_examples=examples.routes.post.activeuser.payload)
+        ],
 ) -> None:
     """
     Set up a new dialog profile for an active callee.
@@ -227,9 +238,9 @@ async def initialize_active_callee_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def initialize_caller_totals_dialog_profile(
-    params: Annotated[
-        CallerDialogParams, Body(openapi_examples=examples.routes.post.caller.payload)
-    ],
+        params: Annotated[
+            CallerDialogParams, Body(openapi_examples=examples.routes.post.caller.payload)
+        ],
 ) -> None:
     """
     Set up a new dialog profile for a caller, inclusive of totals.
@@ -250,9 +261,9 @@ async def initialize_caller_totals_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def initialize_callee_totals_dialog_profile(
-    params: Annotated[
-        CalleeDialogParams, Body(openapi_examples=examples.routes.post.callee.payload)
-    ],
+        params: Annotated[
+            CalleeDialogParams, Body(openapi_examples=examples.routes.post.callee.payload)
+        ],
 ) -> None:
     """
     Set up a new dialog profile for a callee, inclusive of totals.
@@ -273,7 +284,7 @@ async def initialize_callee_totals_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_dialog_profile(
-    bundle: Annotated[DialogBundle, Body(openapi_examples=examples.routes.put.delete.payload)],
+        bundle: Annotated[DialogBundle, Body(openapi_examples=examples.routes.put.delete.payload)],
 ) -> None:
     """
     Remove dialog record from database for a dialog.
@@ -293,7 +304,7 @@ async def delete_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_user_dialog_profile(
-    bundle: Annotated[UserDialogIdBundle, Body(openapi_examples=examples.routes.put.user.payload)],
+        bundle: Annotated[UserDialogIdBundle, Body(openapi_examples=examples.routes.put.user.payload)],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a user.
@@ -314,9 +325,9 @@ async def delete_user_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_account_dialog_profile(
-    bundle: Annotated[
-        AccountDialogIdBundle, Body(openapi_examples=examples.routes.put.account.payload)
-    ],
+        bundle: Annotated[
+            AccountDialogIdBundle, Body(openapi_examples=examples.routes.put.account.payload)
+        ],
 ) -> None:
     """
     Update counter values and remove dialog record from database for an account.
@@ -337,9 +348,9 @@ async def delete_account_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_reseller_dialog_profile(
-    bundle: Annotated[
-        ResellerDialogIdBundle, Body(openapi_examples=examples.routes.put.reseller.payload)
-    ],
+        bundle: Annotated[
+            ResellerDialogIdBundle, Body(openapi_examples=examples.routes.put.reseller.payload)
+        ],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a reseller.
@@ -360,9 +371,9 @@ async def delete_reseller_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_location_dialog_profile(
-    bundle: Annotated[
-        LocationDialogIdBundle, Body(openapi_examples=examples.routes.put.location.payload)
-    ],
+        bundle: Annotated[
+            LocationDialogIdBundle, Body(openapi_examples=examples.routes.put.location.payload)
+        ],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a location.
@@ -383,7 +394,7 @@ async def delete_location_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_peer_dialog_profile(
-    bundle: Annotated[PeerDialogIdBundle, Body(openapi_examples=examples.routes.put.peer.payload)],
+        bundle: Annotated[PeerDialogIdBundle, Body(openapi_examples=examples.routes.put.peer.payload)],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a peer.
@@ -404,7 +415,7 @@ async def delete_peer_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_active_user_dialog_profile(
-    bundle: Annotated[UserDialogIdBundle, Body(openapi_examples=examples.routes.put.user.payload)],
+        bundle: Annotated[UserDialogIdBundle, Body(openapi_examples=examples.routes.put.user.payload)],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a user.
@@ -425,9 +436,9 @@ async def delete_active_user_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_transferred_callee_dialog_profile(
-    bundle: Annotated[
-        CalleeDialogIdBundle, Body(openapi_examples=examples.routes.put.callee.payload)
-    ],
+        bundle: Annotated[
+            CalleeDialogIdBundle, Body(openapi_examples=examples.routes.put.callee.payload)
+        ],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a transferred callee.
@@ -448,9 +459,9 @@ async def delete_transferred_callee_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_transferred_caller_dialog_profile(
-    bundle: Annotated[
-        CallerDialogIdBundle, Body(openapi_examples=examples.routes.put.caller.payload)
-    ],
+        bundle: Annotated[
+            CallerDialogIdBundle, Body(openapi_examples=examples.routes.put.caller.payload)
+        ],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a transferred caller.
@@ -471,9 +482,9 @@ async def delete_transferred_caller_dialog_profile(
     status_code=status.HTTP_200_OK,
 )
 async def delete_huntgroup_member_dialog_profile(
-    bundle: Annotated[
-        HuntgroupDialogIdBundle, Body(openapi_examples=examples.routes.put.huntgroup.payload)
-    ],
+        bundle: Annotated[
+            HuntgroupDialogIdBundle, Body(openapi_examples=examples.routes.put.huntgroup.payload)
+        ],
 ) -> None:
     """
     Update counter values and remove dialog record from database for a huntgroup member.

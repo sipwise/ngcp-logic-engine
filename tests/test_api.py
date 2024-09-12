@@ -11,11 +11,14 @@ from ngcp_logic_engine.redismanager import RedisManager
 app.include_router(api_v1)
 client = TestClient(app)
 
-
 mock_dialog = {
     "callid": "8fasnef81iu2jnfdojqwefhouf",
     "ftag": "$12312312$",
     "ttag": "$ttag232421$",
+}
+
+mock_dialog_no_tag = {
+    "callid": "8fasnef81iu2jnfdojqwefhouf",
 }
 
 mock_dialog_uuid = mock_dialog["callid"]
@@ -50,6 +53,11 @@ mock_callee_dialog_params = {
 
 mock_active_user_dialog_params = {
     "dialog": mock_dialog,
+    "user_id": "iufasdifj23",
+}
+
+mock_no_tag_dialog_params = {
+    "dialog": mock_dialog_no_tag,
     "user_id": "iufasdifj23",
 }
 
@@ -106,7 +114,6 @@ mock_caller_dialog_bundle = {
         "location": "p28u348qwfn",
     },
 }
-
 
 mock_huntgroup_dialog_bundle = mock_callee_dialog_bundle
 
@@ -657,3 +664,18 @@ def test_get_counter(fake_redis_manager) -> None:
     assert client.get(url).json() == {"name": f"user:{user_id}", "value": 0}
     client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
     assert client.get(url).json() == {"name": f"user:{user_id}", "value": 1}
+
+
+def test_send_dialog_without_tags_when_required(fake_dialog_manager, fake_redis_manager) -> None:
+    """
+    Test initializing the callee dialog profile.
+
+    :param fake_dialog_manager: Mocked DialogManager class.
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    config.settings.use_dialog_id_tags = True
+    response = client.post("/api/v1/dialog/user/caller/active", json=mock_no_tag_dialog_params)
+    expected_error_code = 400
+    assert response.status_code == expected_error_code
+    assert response.json() == {"message": "Dialog id tags can't be empty"}
