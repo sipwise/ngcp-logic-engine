@@ -67,7 +67,7 @@ class RedisManager:
         :raises RedisError: If the request produces an error
         """
         counter_value = cls.increase(key)
-        cls.local_db.sadd(uuid, key)
+        cls.local_db.lpush(uuid, key)
 
         return counter_value
 
@@ -103,38 +103,40 @@ class RedisManager:
         return 0
 
     @classmethod
-    def get_local_value(cls, key: str) -> set[str]:
+    def get_local_value(cls, key: str) -> list[str]:
         """
         Get value of key in the local database.
 
-        Returns a set containing the members of the key.
+        Returns a list containing the members of the key.
 
         :returns: The key's members.
         :rtype: int
         """
-        val = cls.local_db.smembers(key)
+        val = cls.local_db.lrange(key, 0, -1)
         return val
 
     @classmethod
     def delete_key(cls, uuid: str, key: str) -> None:
         """
-        Delete call-id key from local database and decrease its value.
+        Delete call-id key from local database and decrease its value from the central database.
 
         Removes a key for a specific dialog uuid in the local
         database and decreases its value on the
-        central database.
+        central database. If no key is found on the local database
+        the central database is deletion operation is skipped.
 
         :return:
         """
-        cls.local_db.srem(uuid, key)
-        cls.decrease(key)
+        val = cls.local_db.lrem(uuid, 1, key)
+        if val > 0:
+            cls.decrease(key)
 
     @classmethod
     def _delete_local_db_dialog_id(cls, uuid: str) -> None:
         """
         Delete dialog id from local database.
 
-        Removes the given dialog set from the local database.
+        Removes the given dialog list from the local database.
         :return:
         """
         cls.local_db.delete(uuid)
@@ -148,7 +150,7 @@ class RedisManager:
         and deletes the set.
         :return:
         """
-        keys = cls.local_db.smembers(uuid)
+        keys = cls.local_db.lrange(uuid, 0, -1)
         for key in keys:
             cls.decrease(key)
         cls._delete_local_db_dialog_id(uuid)

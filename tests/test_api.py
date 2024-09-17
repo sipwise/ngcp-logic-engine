@@ -1,6 +1,7 @@
 """Test ngcp-logic-engine REST API."""
 
 import difflib
+from collections import Counter
 
 from fastapi.testclient import TestClient
 
@@ -173,7 +174,7 @@ def test_initialize_peer_dialog_profile(fake_dialog_manager, fake_redis_manager)
     client.post("/api/v1/dialog/peer", json=mock_peer_dialog_params)
     keys = make_keys("peer", "peerout", "relay")
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_initialize_caller_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -196,7 +197,7 @@ def test_initialize_caller_dialog_profile(fake_dialog_manager, fake_redis_manage
         "locationout",
     )
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_initialize_callee_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -210,7 +211,7 @@ def test_initialize_callee_dialog_profile(fake_dialog_manager, fake_redis_manage
     client.post("/api/v1/dialog/user/callee", json=mock_callee_dialog_params)
     keys = make_keys("location")
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_initialize_active_caller_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -224,7 +225,7 @@ def test_initialize_active_caller_dialog_profile(fake_dialog_manager, fake_redis
     client.post("/api/v1/dialog/user/caller/active", json=mock_active_user_dialog_params)
     keys = make_keys("activeuser")
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_initialize_active_callee_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -238,7 +239,7 @@ def test_initialize_active_callee_dialog_profile(fake_dialog_manager, fake_redis
     client.post("/api/v1/dialog/user/callee/active", json=mock_active_user_dialog_params)
     keys = make_keys("activeuser")
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_initialize_caller_totals_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -262,7 +263,7 @@ def test_initialize_caller_totals_dialog_profile(fake_dialog_manager, fake_redis
         "totallocationout",
     )
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_initialize_callee_totals_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -276,7 +277,7 @@ def test_initialize_callee_totals_dialog_profile(fake_dialog_manager, fake_redis
     client.post("/api/v1/dialog/user/callee/totals", json=mock_callee_dialog_params)
     keys = make_keys("location")
     assert_key_value(1, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {*keys}
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
 
 
 def test_delete_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -291,7 +292,7 @@ def test_delete_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
     client.put("/api/v1/dialog/delete", json=mock_dialog_bundle)
     keys = make_keys("peer", "peerout", "relay")
     assert_key_value(0, keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == set()
+    assert RedisManager.get_local_value(mock_dialog_uuid) == []
 
 
 def test_delete_user_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -326,9 +327,9 @@ def test_delete_user_dialog_profile(fake_dialog_manager, fake_redis_manager) -> 
     )
     deleted_keys = make_keys("user", "userout", "totaluser", "totaluserout")
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_account_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -363,9 +364,9 @@ def test_delete_account_dialog_profile(fake_dialog_manager, fake_redis_manager) 
     )
     deleted_keys = make_keys("account", "accountout", "totalaccount", "totalaccountout")
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_reseller_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -400,9 +401,9 @@ def test_delete_reseller_dialog_profile(fake_dialog_manager, fake_redis_manager)
     )
     deleted_keys = make_keys("reseller", "resellerout", "totalreseller", "totalresellerout")
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_location_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -437,9 +438,9 @@ def test_delete_location_dialog_profile(fake_dialog_manager, fake_redis_manager)
     )
     deleted_keys = make_keys("location", "locationout", "totallocation", "totallocationout")
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_peer_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -474,9 +475,9 @@ def test_delete_peer_dialog_profile(fake_dialog_manager, fake_redis_manager) -> 
     )
     deleted_keys = make_keys("peer", "peerout", "relay")
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_active_user_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -491,7 +492,7 @@ def test_delete_active_user_dialog_profile(fake_dialog_manager, fake_redis_manag
     client.put("/api/v1/dialog/delete/user/active", json=mock_user_dialog_bundle)
     deleted_keys = make_keys("activeuser")
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == set()
+    assert RedisManager.get_local_value(mock_dialog_uuid) == []
 
 
 def test_delete_transferred_callee_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -537,9 +538,9 @@ def test_delete_transferred_callee_dialog_profile(fake_dialog_manager, fake_redi
         "total",
     )
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_transferred_caller_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -593,9 +594,9 @@ def test_delete_transferred_caller_dialog_profile(fake_dialog_manager, fake_redi
         "total",
     )
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_delete_huntgroup_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
@@ -647,9 +648,9 @@ def test_delete_huntgroup_dialog_profile(fake_dialog_manager, fake_redis_manager
         "total",
     )
     assert_key_value(0, deleted_keys)
-    assert RedisManager.get_local_value(mock_dialog_uuid) == {
-        *[key for key in all_keys if key not in deleted_keys]
-    }
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
 
 
 def test_get_counter(fake_redis_manager) -> None:
