@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from ngcp_logic_engine import config
+from ngcp_logic_engine.models.api import CallCounter, GeneralCounter
 from ngcp_logic_engine.models.dialog import (
     ActiveUserDialogParams,
     CalleeDialogParams,
     CallerDialogParams,
+    CounterDialogParams,
     Dialog,
     DialogIdBundle,
     DialogKeyIds,
@@ -33,7 +35,8 @@ class DialogManager:
         dialog_id: str = dialog.callid
         if config.settings.use_dialog_id_tags:
             if not dialog.ftag or not dialog.ttag:
-                raise ValueError("Dialog id tags can't be empty")
+                msg = "Dialog id tags can't be empty"
+                raise ValueError(msg)
             dialog_id = f"{dialog.ftag}:{dialog.callid}:{dialog.ttag}"
 
         return dialog_id
@@ -135,6 +138,27 @@ class DialogManager:
         """
         key = f"{dialog_key}:{dialog_key_id}" if dialog_key_id is not None else dialog_key
         RedisManager.create_key(dialog_uuid, key)
+
+    @classmethod
+    def set_dialog_profile_counter(cls, params: CounterDialogParams) -> None:
+        """
+        Set dialog profile for any counter.
+
+        Sets the dialog call-id and counters for any counter
+        :param params:
+        :return:
+        """
+        dialog_uuid = cls._parse_dialog_uuid(params.dialog)
+        if params.counter in CallCounter:
+            if params.id is None:
+                msg = "counter id must be specified"
+                raise ValueError(msg)
+            cls._set_dialog_profile(dialog_uuid, params.counter, params.id)
+        elif params.counter in GeneralCounter:
+            cls._set_dialog_profile(dialog_uuid, params.counter)
+        else:
+            msg = "counter unknown"
+            raise ValueError(msg)
 
     @classmethod
     def set_dialog_profile_peer(cls, params: PeerDialogParams) -> None:

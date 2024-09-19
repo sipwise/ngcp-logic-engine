@@ -113,6 +113,7 @@ convention = "numpy"
       uvicorn \
         --host $host \
         --port $port \
+        --log-level debug \
         --reload \
         ngcp_logic_engine.api:app
     } else {

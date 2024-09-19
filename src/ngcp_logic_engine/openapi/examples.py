@@ -6,6 +6,22 @@ from typing import Any
 _routes = {
     "get": {},
     "post": {
+        "counter": {
+            "payload": {
+                "valid": {
+                    "value": {
+                        "dialog": {
+                            "callid": "8fasnef81iu2jnfdojqwefhouf",
+                            "ftag": "$12312312$",
+                            "ttag": "$ttag232421$",
+                        },
+                        "counter": "user",
+                        "id": "iufasdifj23",
+                    }
+                }
+            },
+            "response": {},
+        },
         "peer": {
             "payload": {
                 "valid": {

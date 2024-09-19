@@ -32,6 +32,13 @@ class DialogParams(BaseModel):
     dialog: Dialog
 
 
+class CounterDialogParams(DialogParams):
+    """Counter dialog request body parameter constraints."""
+
+    counter: str
+    id: str | None = Field(default=None)
+
+
 class PeerDialogParams(DialogParams):
     """Peer dialog request body parameter constraints."""
 

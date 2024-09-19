@@ -35,7 +35,7 @@ class BaseEnum(Enum, metaclass=MetaEnum):
         return [element.value for element in cls]
 
 
-class Counter(str, BaseEnum):
+class CallCounter(str, BaseEnum):
     """Contains all counters tied to an identification number."""
 
     user = "user"

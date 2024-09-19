@@ -2,10 +2,10 @@
 
 from fastapi import HTTPException
 
-from ngcp_logic_engine.models.api import Counter, GeneralCounter
+from ngcp_logic_engine.models.api import CallCounter, GeneralCounter
 
 
-def check_valid_counter(name: str) -> None:
+def check_valid_call_counter(name: str) -> None:
     """Check if counter is valid.
 
     Verifies that the given name is a member of the Counter enum.
@@ -14,7 +14,7 @@ def check_valid_counter(name: str) -> None:
     :raises HTTPException: 400 - Invalid counter
     :returns: None
     """
-    if name not in Counter:
+    if name not in CallCounter:
         raise HTTPException(status_code=400, detail="Invalid counter")
 
 

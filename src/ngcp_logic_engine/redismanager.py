@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+
 from redis import Redis
 
 from ngcp_logic_engine.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class RedisManager:
@@ -54,7 +58,9 @@ class RedisManager:
         :returns: int
         :raises RedisError: If the request produces an error
         """
-        return cls.central_db.incr(key)
+        res = cls.central_db.incr(key)
+        logger.debug("%s increased to %d", key, res)
+        return res
 
     @classmethod
     def create_key(cls, uuid: str, key: str) -> int:
@@ -68,7 +74,7 @@ class RedisManager:
         """
         counter_value = cls.increase(key)
         cls.local_db.lpush(uuid, key)
-
+        logger.debug("%s added to uuid:%s", key, uuid)
         return counter_value
 
     @classmethod
@@ -83,8 +89,9 @@ class RedisManager:
         value = cls.central_db.decr(key)
         if value <= 0:
             cls.central_db.delete(key)
+            logger.debug("%s was <= 0, removed", key)
             return 0
-
+        logger.debug("%s descreased to %d", key, value)
         return value
 
     @classmethod
@@ -128,6 +135,7 @@ class RedisManager:
         :return:
         """
         val = cls.local_db.lrem(uuid, 1, key)
+        logger.debug("%s deleted from uuid:%s", key, uuid)
         if val > 0:
             cls.decrease(key)
 
@@ -140,6 +148,7 @@ class RedisManager:
         :return:
         """
         cls.local_db.delete(uuid)
+        logger.debug("%s deleted", uuid)
 
     @classmethod
     def delete_dialog_id(cls, uuid: str) -> None:
@@ -151,6 +160,7 @@ class RedisManager:
         :return:
         """
         keys = cls.local_db.lrange(uuid, 0, -1)
+        logger.debug("%s decreasing keys", uuid)
         for key in keys:
             cls.decrease(key)
         cls._delete_local_db_dialog_id(uuid)

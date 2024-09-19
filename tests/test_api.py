@@ -3,6 +3,7 @@
 import difflib
 from collections import Counter
 
+from fastapi import status
 from fastapi.testclient import TestClient
 
 from ngcp_logic_engine import config
@@ -10,6 +11,7 @@ from ngcp_logic_engine.api import api_v1, app
 from ngcp_logic_engine.redismanager import RedisManager
 
 app.include_router(api_v1)
+prefix = "/api/v1/dialog"
 client = TestClient(app)
 
 mock_dialog = {
@@ -27,6 +29,28 @@ if config.settings.use_dialog_id_tags:
     mock_dialog_uuid = f"{mock_dialog['ftag']}:{mock_dialog['callid']}:{mock_dialog['ttag']}"
 
 mock_dialog_bundle = {"dialog": mock_dialog}
+
+mock_call_counter_dialog_params = {
+    "dialog": mock_dialog,
+    "counter": "user",
+    "id": "iufasdifj23",
+}
+
+mock_call_counter_dialog_params_no_id = {
+    "dialog": mock_dialog,
+    "counter": "user",
+}
+
+mock_invalid_counter_dialog_params = {
+    "dialog": mock_dialog,
+    "counter": "invalid",
+    "id": "iufasdifj23",
+}
+
+mock_general_counter_dialog_params = {
+    "dialog": mock_dialog,
+    "counter": "peer:faxserver",
+}
 
 mock_peer_dialog_params = {
     "dialog": mock_dialog,
@@ -163,6 +187,66 @@ def assert_key_value(target, keys) -> None:
         assert RedisManager.get_central_value(key) == target
 
 
+def test_initialize_call_counter_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
+    """
+    Test initializing the ize_peer dialog profile.
+
+    :param fake_dialog_manager: Mocked DialogManager class.
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    response = client.post(f"{prefix}/counter", json=mock_call_counter_dialog_params)
+    assert response.status_code == status.HTTP_200_OK
+    keys = make_keys("user")
+    assert_key_value(1, keys)
+    assert RedisManager.get_local_value(mock_dialog_uuid) == [*keys]
+
+
+def test_initialize_general_counter_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
+    """
+    Test initializing the ize_peer dialog profile.
+
+    :param fake_dialog_manager: Mocked DialogManager class.
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    response = client.post(f"{prefix}/counter", json=mock_general_counter_dialog_params)
+    assert response.status_code == status.HTTP_200_OK
+    keys = make_keys("peer:faxserver")
+    assert_key_value(1, keys)
+    assert RedisManager.get_local_value(mock_dialog_uuid) == [*keys]
+
+
+def test_fail_to_initialize_invalid_counter_dialog_profile(
+    fake_dialog_manager, fake_redis_manager
+) -> None:
+    """
+    Test initializing the ize_peer dialog profile.
+
+    :param fake_dialog_manager: Mocked DialogManager class.
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    response = client.post(f"{prefix}/counter", json=mock_invalid_counter_dialog_params)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"message": "counter unknown"}
+
+
+def test_fail_to_initialize_call_counter_dialog_profile(
+    fake_dialog_manager, fake_redis_manager
+) -> None:
+    """
+    Test initializing the ize_peer dialog profile.
+
+    :param fake_dialog_manager: Mocked DialogManager class.
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    response = client.post(f"{prefix}/counter", json=mock_call_counter_dialog_params_no_id)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"message": "counter id must be specified"}
+
+
 def test_initialize_peer_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
     """
     Test initializing the ize_peer dialog profile.
@@ -171,7 +255,8 @@ def test_initialize_peer_dialog_profile(fake_dialog_manager, fake_redis_manager)
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/peer", json=mock_peer_dialog_params)
+    res = client.post(f"{prefix}/peer", json=mock_peer_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys("peer", "peerout", "relay")
     assert_key_value(1, keys)
     assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
@@ -185,7 +270,8 @@ def test_initialize_caller_dialog_profile(fake_dialog_manager, fake_redis_manage
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys(
         "user",
         "account",
@@ -208,7 +294,8 @@ def test_initialize_callee_dialog_profile(fake_dialog_manager, fake_redis_manage
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/callee", json=mock_callee_dialog_params)
+    res = client.post(f"{prefix}/user/callee", json=mock_callee_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys("location")
     assert_key_value(1, keys)
     assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
@@ -222,7 +309,8 @@ def test_initialize_active_caller_dialog_profile(fake_dialog_manager, fake_redis
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller/active", json=mock_active_user_dialog_params)
+    res = client.post(f"{prefix}/user/caller/active", json=mock_active_user_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys("activeuser")
     assert_key_value(1, keys)
     assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
@@ -236,7 +324,8 @@ def test_initialize_active_callee_dialog_profile(fake_dialog_manager, fake_redis
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/callee/active", json=mock_active_user_dialog_params)
+    res = client.post(f"{prefix}/user/callee/active", json=mock_active_user_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys("activeuser")
     assert_key_value(1, keys)
     assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
@@ -250,7 +339,8 @@ def test_initialize_caller_totals_dialog_profile(fake_dialog_manager, fake_redis
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys(
         "total",
         "totaluser",
@@ -274,7 +364,8 @@ def test_initialize_callee_totals_dialog_profile(fake_dialog_manager, fake_redis
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/callee/totals", json=mock_callee_dialog_params)
+    res = client.post(f"{prefix}/user/callee/totals", json=mock_callee_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys("location")
     assert_key_value(1, keys)
     assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter([*keys])
@@ -288,8 +379,10 @@ def test_delete_dialog_profile(fake_dialog_manager, fake_redis_manager) -> None:
     :param fake_redis_manager: Mocked .RedisManager class
     :return:
     """
-    client.post("/api/v1/dialog/peer", json=mock_peer_dialog_params)
-    client.put("/api/v1/dialog/delete", json=mock_dialog_bundle)
+    res = client.post(f"{prefix}/peer", json=mock_peer_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete", json=mock_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     keys = make_keys("peer", "peerout", "relay")
     assert_key_value(0, keys)
     assert RedisManager.get_local_value(mock_dialog_uuid) == []
@@ -303,9 +396,12 @@ def test_delete_user_dialog_profile(fake_dialog_manager, fake_redis_manager) -> 
     :param fake_redis_manager: Mocked RedisManager c.lass
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/user", json=mock_user_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/user", json=mock_user_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -340,9 +436,12 @@ def test_delete_account_dialog_profile(fake_dialog_manager, fake_redis_manager) 
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/account", json=mock_account_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/account", json=mock_account_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -377,9 +476,12 @@ def test_delete_reseller_dialog_profile(fake_dialog_manager, fake_redis_manager)
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/reseller", json=mock_reseller_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/reseller", json=mock_reseller_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -414,9 +516,12 @@ def test_delete_location_dialog_profile(fake_dialog_manager, fake_redis_manager)
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/location", json=mock_location_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/location", json=mock_location_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -451,9 +556,12 @@ def test_delete_peer_dialog_profile(fake_dialog_manager, fake_redis_manager) -> 
     :param fake_redis_manager: Mocked RedisManager c.lass
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/peer", json=mock_peer_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/peer", json=mock_peer_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -488,8 +596,10 @@ def test_delete_active_user_dialog_profile(fake_dialog_manager, fake_redis_manag
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller/active", json=mock_active_user_dialog_params)
-    client.put("/api/v1/dialog/delete/user/active", json=mock_user_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller/active", json=mock_active_user_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/user/active", json=mock_user_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     deleted_keys = make_keys("activeuser")
     assert_key_value(0, deleted_keys)
     assert RedisManager.get_local_value(mock_dialog_uuid) == []
@@ -503,9 +613,12 @@ def test_delete_transferred_callee_dialog_profile(fake_dialog_manager, fake_redi
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/transferred/callee", json=mock_callee_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/transferred/callee", json=mock_callee_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -551,9 +664,12 @@ def test_delete_transferred_caller_dialog_profile(fake_dialog_manager, fake_redi
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/transferred/caller", json=mock_caller_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/transferred/caller", json=mock_caller_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -607,9 +723,12 @@ def test_delete_huntgroup_dialog_profile(fake_dialog_manager, fake_redis_manager
     :param fake_redis_manager: Mocked RedisManager class.
     :return:
     """
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    client.post("/api/v1/dialog/user/caller/totals", json=mock_caller_dialog_params)
-    client.put("/api/v1/dialog/delete/huntgroup", json=mock_huntgroup_dialog_bundle)
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.post(f"{prefix}/user/caller/totals", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(f"{prefix}/delete/huntgroup", json=mock_huntgroup_dialog_bundle)
+    assert res.status_code == status.HTTP_200_OK
     all_keys = make_keys(
         "user",
         "account",
@@ -662,9 +781,14 @@ def test_get_counter(fake_redis_manager) -> None:
     """
     user_id = mock_caller_dialog_params["user_id"]
     url = f"/api/v1/counter/user:{user_id}"
-    assert client.get(url).json() == {"name": f"user:{user_id}", "value": 0}
-    client.post("/api/v1/dialog/user/caller", json=mock_caller_dialog_params)
-    assert client.get(url).json() == {"name": f"user:{user_id}", "value": 1}
+    res = client.get(url)
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() == {"name": f"user:{user_id}", "value": 0}
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params)
+    assert res.status_code == status.HTTP_200_OK
+    res = client.get(url)
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() == {"name": f"user:{user_id}", "value": 1}
 
 
 def test_send_dialog_without_tags_when_required(fake_dialog_manager, fake_redis_manager) -> None:
@@ -676,7 +800,6 @@ def test_send_dialog_without_tags_when_required(fake_dialog_manager, fake_redis_
     :return:
     """
     config.settings.use_dialog_id_tags = True
-    response = client.post("/api/v1/dialog/user/caller/active", json=mock_no_tag_dialog_params)
-    expected_error_code = 400
-    assert response.status_code == expected_error_code
+    response = client.post(f"{prefix}/user/caller/active", json=mock_no_tag_dialog_params)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"message": "Dialog id tags can't be empty"}
