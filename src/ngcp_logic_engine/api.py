@@ -11,6 +11,7 @@ from fastapi import APIRouter, Body, FastAPI, status
 from redis import RedisError
 from starlette.responses import JSONResponse
 
+from ngcp_logic_engine import config
 from ngcp_logic_engine.dialogmanager import DialogManager
 from ngcp_logic_engine.models.api import CounterResult, HealthCheck
 from ngcp_logic_engine.models.dialog import (
@@ -41,7 +42,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     for handler in logging.root.handlers:
         logging.root.removeHandler(handler)
     # - Add coloredlogs' colored StreamHandler to the root logger.
-    coloredlogs.install()
+    coloredlogs.install(level=config.settings.log_level)
     yield
     # Shutdown events.
 

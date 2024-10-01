@@ -1,5 +1,6 @@
 """ngcp-logic-engine  settings."""
 
+import logging
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,7 +10,7 @@ class BaseConfig(BaseSettings):
     """common configs."""
 
     env: str = "development"
-
+    log_level: int = logging.INFO
     model_config = SettingsConfigDict(env_prefix="logic_engine_")
     use_dialog_id_tags: bool = False
     redis_central_host: str = "redis"
@@ -24,6 +25,8 @@ class BaseConfig(BaseSettings):
 class DevelopmentConfig(BaseConfig):
     """development config."""
 
+    log_level: int = logging.DEBUG
+
 
 class ProductionConfig(BaseConfig):
     """production config."""
@@ -32,6 +35,7 @@ class ProductionConfig(BaseConfig):
 class TestingConfig(BaseConfig):
     """configs for testing."""
 
+    log_level: int = logging.DEBUG
     redis_central_host: str = "localhost"
     redis_local_host: str = "localhost"
 
