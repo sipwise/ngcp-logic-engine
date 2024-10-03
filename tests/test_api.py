@@ -2,6 +2,7 @@
 
 import difflib
 from collections import Counter
+from copy import deepcopy
 
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -688,6 +689,77 @@ def test_delete_transferred_caller_dialog_profile(fake_dialog_manager, fake_redi
         "totalaccountout",
         "totalresellerout",
         "totallocationout",
+    )
+    deleted_keys = make_keys(
+        "user",
+        "userout",
+        "totaluser",
+        "totaluserout",
+        "activeuser",
+        "account",
+        "accountout",
+        "totalaccount",
+        "totalaccountout",
+        "location",
+        "locationout",
+        "reseller",
+        "resellerout",
+        "totalreseller",
+        "totalresellerout",
+        "general",
+        "incoming",
+        "total",
+    )
+    assert_key_value(0, deleted_keys)
+    assert Counter(RedisManager.get_local_value(mock_dialog_uuid)) == Counter(
+        [*[key for key in all_keys if key not in deleted_keys]]
+    )
+
+
+def test_delete_transferred_caller_dialog_profile_no_location(
+    fake_dialog_manager, fake_redis_manager
+) -> None:
+    """
+    Test updating the transferred caller dialog profile.
+
+    :param fake_dialog_manager: Mocked DialogManager class.
+    :param fake_redis_manager: Mocked RedisManager class.
+    :return:
+    """
+    mock_caller_dialog_params_no_loc = deepcopy(mock_caller_dialog_params)
+    del mock_caller_dialog_params_no_loc["location_id"]
+    res = client.post(f"{prefix}/user/caller", json=mock_caller_dialog_params_no_loc)
+    assert res.status_code == status.HTTP_200_OK
+    mock_caller_dialog_params_no_loc = deepcopy(mock_caller_dialog_params)
+    del mock_caller_dialog_params_no_loc["location_id"]
+    res = client.post(
+        f"{prefix}/user/caller/totals",
+        json=mock_caller_dialog_params_no_loc,
+    )
+    mock_caller_dialog_bundle_no_loc = deepcopy(mock_caller_dialog_bundle)
+    del mock_caller_dialog_bundle_no_loc["dialog_key_ids"]["location"]
+    assert res.status_code == status.HTTP_200_OK
+    res = client.put(
+        f"{prefix}/delete/transferred/caller",
+        json=mock_caller_dialog_bundle_no_loc,
+    )
+    assert res.status_code == status.HTTP_200_OK
+    all_keys = make_keys(
+        "user",
+        "account",
+        "reseller",
+        "location",
+        "userout",
+        "accountout",
+        "resellerout",
+        "locationout",
+        "total",
+        "totaluser",
+        "totalaccount",
+        "totalreseller",
+        "totaluserout",
+        "totalaccountout",
+        "totalresellerout",
     )
     deleted_keys = make_keys(
         "user",

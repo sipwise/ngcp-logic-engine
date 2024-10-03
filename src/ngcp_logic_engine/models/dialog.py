@@ -160,7 +160,7 @@ class CalleeDialogKeyIds(DialogKeyIds):
 
     user: str
     account: str
-    location: str
+    location: str | None = Field(default=None)
 
 
 class CallerDialogKeyIds(DialogKeyIds):
@@ -173,7 +173,7 @@ class CallerDialogKeyIds(DialogKeyIds):
 
     user: str
     account: str
-    location: str
+    location: str | None = Field(default=None)
     reseller: str
 
 
@@ -187,7 +187,7 @@ class HuntgroupDialogKeyIds(DialogKeyIds):
 
     user: str
     account: str
-    location: str
+    location: str | None = Field(default=None)
 
 
 class DialogBundle(BaseModel):
