@@ -1,0 +1,25 @@
+[Unit]
+Description=Gunicorn instance for ngcp-logic-engine
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+EnvironmentFile=-/etc/default/ngcp-logic-engine
+WorkingDirectory=/var/lib/ngcp-logic-engine
+RuntimeDirectory=ngcp-logic-engine
+ExecStart=gunicorn \
+  --access-logfile - \
+  --bind unix:/run/ngcp-logic-engine/gunicorn.sock \
+  --graceful-timeout $GRACEFUL_TIMEOUT \
+  --keep-alive $KEEP_ALIVE \
+  --log-file - \
+  --log-level $LOG_LEVEL \
+  --timeout $TIMEOUT \
+  --worker-class uvicorn.workers.UvicornWorker \
+  --worker-tmp-dir /dev/shm \
+  --workers $WORKERS \
+  ngcp_logic_engine.api:app
+
+[Install]
+WantedBy=multi-user.target

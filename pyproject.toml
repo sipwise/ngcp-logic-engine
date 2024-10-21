@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]  # https://python-poetry.org/docs/pyproject/
 name = "ngcp-logic-engine"
-version = "0.0.0"
+version = "13.3.0"
 description = "NGCP business logic engine"
 authors = ["Sipwise Development Team <support@sipwise.com>"]
 readme = "README.md"

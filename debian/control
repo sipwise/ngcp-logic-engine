@@ -1,0 +1,34 @@
+Source: ngcp-logic-engine
+Section: python
+Priority: optional
+Maintainer: Sipwise Development Team <support@sipwise.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-sequence-python3,
+ pybuild-plugin-pyproject,
+ python3-all,
+ python3-poetry,
+Homepage: https://www.sipwise.com/
+Rules-Requires-Root: no
+Standards-Version: 4.6.2
+Vcs-Git: https://github.com/sipwise/ngcp-logic-engine.git
+Vcs-Browser: https://github.com/sipwise/ngcp-logic-engine
+
+Package: ngcp-logic-engine
+Section: python
+Architecture: all
+Depends:
+ gunicorn,
+ python3-poetry,
+ ${misc:Depends},
+ ${python3:Depends},
+Recommends:
+ python3-setuptools,
+Description: uwsgi NGCP logic engine app
+ logic-engine is intended to be a centralized
+ collector of the call information capable of
+ take decisions about the call routine.
+ It can be interrogated via REST API by all the
+ processes like kamailio, sems or the AS.
+ .
+ This package provides logic-engine webapp.

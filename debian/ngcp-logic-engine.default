@@ -1,0 +1,6 @@
+# ngcp-logic-engine gunicorn variables
+WORKERS=2
+LOG_LEVEL=info
+KEEP_ALIVE=10
+TIMEOUT=30
+GRACEFUL_TIMEOUT=10

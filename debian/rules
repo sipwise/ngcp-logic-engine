@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export EXTRAS=--only-root
+export NO_INTERNET=1
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+# tests are executed in docker on jenkins job
+override_dh_auto_test:
