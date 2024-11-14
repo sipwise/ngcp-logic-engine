@@ -460,7 +460,8 @@ class DialogManager:
         :param dialog_key_ids:
         :return:
         """
-        _dialog_key_ids = dialog_key_ids.model_dump()
+        # dict() V1 model_dump V2
+        _dialog_key_ids = dialog_key_ids.dict()
         _dialog_key_ids["general"] = None
         for key_group, keys in iter(dialog_keys):
             if keys is not None:

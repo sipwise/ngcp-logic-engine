@@ -5,19 +5,20 @@ FROM docker.mgm.sipwise.com/sipwise-bookworm:latest
 # is updated with the current date. It will force refresh of all
 # of the base images and things like `apt-get update` won't be using
 # old cached versions when the Dockerfile is built.
-ENV REFRESHED_AT 2024-07-04
+ENV REFRESHED_AT=2025-01-14
 
 RUN apt-get update && apt-get install --assume-yes \
-  python3-poetry \
+  make \
+  python3-coloredlogs \
+  python3-fakeredis \
+  python3-fastapi \
+  python3-httpx \
+  python3-pytest \
+  python3-redis \
   git \
   && apt-get clean
 
-ENV POETRY_VIRTUALENVS_CREATE=false
 ENV RESULTS=/code/reports
-
-# Get pip to download and install requirements:
-ADD poetry.lock pyproject.toml /tmp/
-RUN poetry install --no-root --with test --no-interaction --directory=/tmp
 
 RUN git config --global --add safe.directory /code
 
