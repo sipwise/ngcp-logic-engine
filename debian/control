@@ -1,6 +1,5 @@
 Source: ngcp-logic-engine
 Section: python
-Priority: optional
 Maintainer: Sipwise Development Team <support@sipwise.com>
 Build-Depends:
  debhelper-compat (= 13),
@@ -9,8 +8,7 @@ Build-Depends:
  python3-all,
  python3-poetry,
 Homepage: https://www.sipwise.com/
-Rules-Requires-Root: no
-Standards-Version: 4.6.2
+Standards-Version: 4.7.2
 Vcs-Git: https://github.com/sipwise/ngcp-logic-engine.git
 Vcs-Browser: https://github.com/sipwise/ngcp-logic-engine
 
