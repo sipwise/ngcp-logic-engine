@@ -125,7 +125,8 @@ class RedisManager:
     @classmethod
     def delete_key(cls, uuid: str, key: str) -> None:
         """
-        Delete call-id key from local database and decrease its value from the central database.
+        Delete call-id key from local database and decrease its value from the
+        central database.
 
         Removes a key for a specific dialog uuid in the local
         database and decreases its value on the

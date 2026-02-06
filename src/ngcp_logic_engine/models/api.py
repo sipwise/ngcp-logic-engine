@@ -53,7 +53,9 @@ class CallCounter(str, BaseEnum):
 
 
 class GeneralCounter(str, BaseEnum):
-    """Contains all counters that are independent of an identification number."""
+    """
+    Contains all counters that are independent of an identification number.
+    """
 
     local = "local"
     total = "total"

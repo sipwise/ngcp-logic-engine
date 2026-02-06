@@ -2,6 +2,14 @@
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.black]
+# Match line-length expected by pycodestyle.
+line-length = 79
+# Current version in Debian trixie.
+target-version = ['py313']
+# Enable preview features, expected by pycodestyle.
+preview = true
+
 [tool.poetry]  # https://python-poetry.org/docs/pyproject/
 name = "ngcp-logic-engine"
 version = "13.3.0"
@@ -85,9 +93,9 @@ xfail_strict = true
 
 [tool.ruff]  # https://github.com/charliermarsh/ruff
 fix = true
-line-length = 100
+line-length = 79
 src = ["src", "tests"]
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["A", "ASYNC", "B", "BLE", "C4", "C90", "D", "DTZ", "E", "EM", "ERA", "F", "FBT", "FLY", "G", "I", "ICN", "INP", "INT", "ISC", "LOG", "N", "NPY", "PERF", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "Q", "RET", "RSE", "RUF", "S", "SIM", "SLF", "SLOT", "T10", "T20", "TCH", "TID", "TRY", "UP", "W", "YTT"]
