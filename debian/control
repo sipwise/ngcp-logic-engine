@@ -17,6 +17,8 @@ Section: python
 Architecture: all
 Depends:
  gunicorn,
+ libjs-d3,
+ libjs-sphinxdoc,
  python3-poetry,
  ${misc:Depends},
  ${python3:Depends},
